@@ -32,7 +32,6 @@ def save_admin(username, password):
         json.dump({
             "username": username,
             "password": password,
-            "email": admin_data["email"]
         }, f)
 
 admin_data = load_admin()
