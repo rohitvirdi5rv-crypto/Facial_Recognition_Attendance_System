@@ -1,8 +1,9 @@
-opencv-python
+streamlit>=1.30.0
+protobuf==3.20.3
+numpy<2.0.0
+pandas
+scikit-learn
+opencv-contrib-python-headless
 mtcnn
 keras-facenet
 tensorflow
-scikit-learn
-pandas
-numpy
-streamlit
