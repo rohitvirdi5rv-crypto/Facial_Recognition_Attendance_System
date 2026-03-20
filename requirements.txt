@@ -1,8 +1,9 @@
-opencv-python
-mtcnn
-keras-facenet
-tf-nightly
-scikit-learn
-pandas
-numpy
-streamlit
+streamlit==1.32.2
+protobuf==3.20.3
+numpy==1.26.4
+pandas==2.2.2
+opencv-python-headless==4.9.0.80
+scikit-learn==1.4.2
+tensorflow==2.15.0
+keras-facenet==0.3.2
+mtcnn==0.1.1
