@@ -1,0 +1,5 @@
+setup.py
+Face_Attendance_System.egg-info/PKG-INFO
+Face_Attendance_System.egg-info/SOURCES.txt
+Face_Attendance_System.egg-info/dependency_links.txt
+Face_Attendance_System.egg-info/top_level.txt

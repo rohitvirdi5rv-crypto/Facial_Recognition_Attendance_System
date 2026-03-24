@@ -2,9 +2,8 @@ import csv
 import os
 import pandas as pd
 
-# =========================================================
 # FILE PATHS
-# =========================================================
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 DATA_DIR = os.path.join(BASE_DIR, "Data")
@@ -14,9 +13,8 @@ ATTENDANCE_FILE = os.path.join(DATA_DIR, "attendance.csv")
 
 os.makedirs(DATA_DIR, exist_ok=True)
 
-# =========================================================
 # SAVE EMPLOYEE INFO
-# =========================================================
+
 def save_employee(emp_id, name, phone, email, address, date):
     file_exists = os.path.exists(EMP_FILE)
 
@@ -35,9 +33,8 @@ def save_employee(emp_id, name, phone, email, address, date):
 
         writer.writerow([emp_id, name, phone, email, address, date])
 
-# =========================================================
 # SAVE EMBEDDINGS
-# =========================================================
+
 def save_embedding(emp_id, embedding):
     file_exists = os.path.exists(EMB_FILE)
     embedding_str = ",".join(map(lambda x: str(round(float(x), 6)), embedding.tolist()))
@@ -50,9 +47,8 @@ def save_embedding(emp_id, embedding):
 
         writer.writerow([emp_id, embedding_str])
 
-# =========================================================
 # UPDATE EMPLOYEE INFO
-# =========================================================
+
 def update_employee(old_emp_id, new_emp_id, name, phone, email, address, date):
     if not os.path.exists(EMP_FILE):
         raise Exception("Employee info file not found.")
@@ -63,6 +59,7 @@ def update_employee(old_emp_id, new_emp_id, name, phone, email, address, date):
         raise Exception("Employee ID not found.")
 
     # Update employee info
+    
     df.loc[df["Employee_ID"] == old_emp_id, [
         "Employee_ID",
         "Employee_Name",
@@ -75,20 +72,21 @@ def update_employee(old_emp_id, new_emp_id, name, phone, email, address, date):
     df.to_csv(EMP_FILE, index=False)
 
     # Update ID in embeddings file
+
     if os.path.exists(EMB_FILE):
         df_emb = pd.read_csv(EMB_FILE)
         if old_emp_id in df_emb["Employee_ID"].values:
             df_emb.loc[df_emb["Employee_ID"] == old_emp_id, "Employee_ID"] = new_emp_id
             df_emb.to_csv(EMB_FILE, index=False)
 
-# =========================================================
 # SAVE ATTENDANCE
-# =========================================================
+
 def save_attendance(emp_id, emp_name, date_str, day_str,
                     in_status="", half_day_status="", out_status="",
                     in_time="", half_day_time="", out_time=""):
 
     # Load CSV or create empty dataframe
+
     if os.path.exists(ATTENDANCE_FILE):
         df = pd.read_csv(ATTENDANCE_FILE)
     else:
@@ -99,10 +97,12 @@ def save_attendance(emp_id, emp_name, date_str, day_str,
         ])
 
     # Ensure Employee_ID is treated as string
+
     df["Employee_ID"] = df["Employee_ID"].astype(str)
     emp_id = str(emp_id)
 
     # Find existing record for same employee + date
+
     mask = (df["Employee_ID"] == emp_id) & (df["Date"] == date_str)
 
     if mask.any():
@@ -110,6 +110,7 @@ def save_attendance(emp_id, emp_name, date_str, day_str,
         idx = df[mask].index[0]
 
         # Update only the required columns
+
         if in_status:
             df.at[idx, "In"] = in_status
             df.at[idx, "In_Time"] = in_time
@@ -123,7 +124,9 @@ def save_attendance(emp_id, emp_name, date_str, day_str,
             df.at[idx, "Out_Time"] = out_time
 
     else:
+
         # Create new row only if no record exists
+
         new_row = {
             "Employee_ID": emp_id,
             "Employee_Name": emp_name,

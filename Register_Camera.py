@@ -4,6 +4,7 @@ from mtcnn import MTCNN
 from keras_facenet import FaceNet
 
 # Initialize detector and FaceNet once
+
 detector = MTCNN()
 facenet = FaceNet()
 
@@ -30,42 +31,85 @@ def capture_faces_streamlit(max_faces=10):
                 break
 
             rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            faces = detector.detect_faces(rgb_frame)
 
-            # 🚨 IMPORTANT FIX
+            # Protect MTCNN crash
+            try:
+                faces = detector.detect_faces(rgb_frame)
+            except Exception as e:
+                print("Detection error:", e)
+                yield rgb_frame, [], None
+                continue
+
             if len(faces) == 0:
                 yield rgb_frame, [], None
                 continue
 
             if faces:
+
                 # Take only first detected face per frame
+
                 face = faces[0]
                 x, y, w, h = face['box']
                 x, y = max(0, x), max(0, y)
 
+                # Skip small faces
+
+                if w < 50 or h < 50:
+                    yield rgb_frame, [], None
+                    continue
+
+                # Ensure inside frame
+
+                if y + h > rgb_frame.shape[0] or x + w > rgb_frame.shape[1]:
+                    yield rgb_frame, [], None
+                    continue
+
                 face_crop = rgb_frame[y:y+h, x:x+w]
 
-                if face_crop.size != 0:
+                # Empty crop protection
+
+                if face_crop is None or face_crop.size == 0:
+                    yield rgb_frame, [], None
+                    continue
+
+                # Resize (VERY IMPORTANT)
+                
+                try:
+                    face_crop = cv2.resize(face_crop, (160, 160))
+                except:
+                    yield rgb_frame, [], None
+                    continue
+
+                # Safe embedding
+
+                try:
                     embedding = facenet.embeddings([face_crop])[0]
                     embedding = np.array(embedding, dtype=np.float32)
+                except Exception as e:
+                    print("Embedding error:", e)
+                    yield rgb_frame, [], None
+                    continue
 
-                    captured_embeddings.append({
-                        'embedding': embedding,
-                        'keypoints': face['keypoints']
-                    })
+                captured_embeddings.append({
+                    'embedding': embedding,
+                    'keypoints': face['keypoints']
+                })
 
-                    frame_count += 1
+                frame_count += 1
 
-                    # Draw rectangle
-                    cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+                # Draw rectangle
 
-                    # Draw keypoints
-                    for point in face['keypoints'].values():
-                        cv2.circle(frame, point, 2, (0, 0, 255), -1)
+                cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+
+                # Draw keypoints
+
+                for point in face['keypoints'].values():
+                    cv2.circle(frame, point, 2, (0, 0, 255), -1)
 
             yield cv2.cvtColor(frame, cv2.COLOR_BGR2RGB), captured_embeddings, mean_embedding
 
         # Compute mean embedding after 10 captures
+        
         if len(captured_embeddings) == max_faces:
             all_embeddings = [item['embedding'] for item in captured_embeddings]
             mean_embedding = np.mean(all_embeddings, axis=0)

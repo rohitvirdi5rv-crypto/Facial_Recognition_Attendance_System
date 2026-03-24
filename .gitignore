@@ -1,0 +1,19 @@
+# cx_Freeze build output
+build/
+dist/
+*.exe
+*.dll
+*.pyd
+*.zip
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Virtual environment
+venv/
+.env/
+
+# OS files
+.DS_Store
+Thumbs.db
