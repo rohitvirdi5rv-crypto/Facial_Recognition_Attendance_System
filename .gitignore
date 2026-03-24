@@ -10,10 +10,13 @@ dist/
 __pycache__/
 *.pyc
 
+# Python packaging
+*.egg-info/
+
 # Virtual environment
 venv/
 .env/
 
 # OS files
 .DS_Store
-Thumbs.db
+Thumbs.db  
